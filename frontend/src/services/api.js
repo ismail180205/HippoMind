@@ -121,6 +121,13 @@ export function deleteSession(sessionId) {
   return del(`/session/${sessionId}`);
 }
 
+/**
+ * Backtrack to a previous node in the search navigation tree.
+ */
+export function backtrackSession(sessionId, nodeId) {
+  return post(`/session/${sessionId}/backtrack`, { node_id: nodeId });
+}
+
 // ── File serving ─────────────────────────────────────────────────────────────
 
 /**
@@ -138,6 +145,14 @@ export function fileDownloadUrl(filePath) {
   return `${API_BASE}/files/download?path=${encodeURIComponent(filePath)}`;
 }
 
+/**
+ * Build the URL to preview a file inline (no download prompt).
+ * Used for embedding PDFs in an iframe.
+ */
+export function filePreviewUrl(filePath) {
+  return `${API_BASE}/files/preview?path=${encodeURIComponent(filePath)}`;
+}
+
 // ── Recent files ─────────────────────────────────────────────────────────────
 
 /**
@@ -146,5 +161,3 @@ export function fileDownloadUrl(filePath) {
 export function getRecentFiles(limit = 20) {
   return get(`/files/recent?limit=${limit}`);
 }
-
-

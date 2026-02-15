@@ -17,7 +17,7 @@
 }
 
 .file-item:hover {
-  border-color: #9966CC;
+  border-color: #9966cc;
   background: #16213e;
 }
 
@@ -37,7 +37,7 @@
 
 .file-size {
   font-size: 11px;
-  color: #9966CC;
+  color: #9966cc;
 }
 
 .file-date {
@@ -58,4 +58,118 @@
 
 .file-download:hover {
   background: rgba(153, 102, 204, 0.2);
+}
+
+/* ── Preview button (eye icon) ─────────────────────────────────────── */
+
+.file-preview-btn {
+  flex-shrink: 0;
+  padding: 4px;
+  border: none;
+  background: none;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.file-item:hover .file-preview-btn {
+  opacity: 1;
+}
+
+.file-preview-btn:hover {
+  background: rgba(153, 102, 204, 0.2);
+}
+
+/* ── PDF preview overlay / modal ───────────────────────────────────── */
+
+.pdf-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.pdf-modal {
+  width: 80vw;
+  height: 85vh;
+  background: #12141d;
+  border: 1px solid rgba(153, 102, 204, 0.35);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.pdf-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(153, 102, 204, 0.2);
+  background: #0d0f18;
+}
+
+.pdf-modal-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e0e0e0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+
+.pdf-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pdf-modal-download {
+  color: #9966CC;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.pdf-modal-download:hover {
+  background: rgba(153, 102, 204, 0.2);
+}
+
+.pdf-modal-close {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border: none;
+  background: none;
+  color: #888;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.pdf-modal-close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.pdf-iframe {
+  flex: 1;
+  border: none;
+  background: #1a1a2e;
 }

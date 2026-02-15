@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Play, Search, X, HelpCircle, Send, Loader } from 'lucide-react';
-import QueryOption from './QueryOption';
-import './QueryInterface.css';
+import React, { useState } from "react";
+import { Play, Search, X, HelpCircle, Send, Loader } from "lucide-react";
+import QueryOption from "./QueryOption";
+import "./QueryInterface.css";
 
 const QueryInterface = ({
   selectedOption,
@@ -19,7 +19,7 @@ const QueryInterface = ({
   onAnswerFollowup,
   onCloseSession,
 }) => {
-  const [followupAnswer, setFollowupAnswer] = useState('');
+  const [followupAnswer, setFollowupAnswer] = useState("");
 
   // ── Active search session view ───────────────────────────────────────
   if (session) {
@@ -27,34 +27,34 @@ const QueryInterface = ({
       <div className="query-interface">
         <div className="query-header">
           <h2 className="query-title">
-            {session.status === 'found'
-              ? '🎯 File Found!'
-              : session.status === 'exhausted'
-              ? '📋 Narrowed Down'
-              : session.status === 'followup'
-              ? '💭 Follow‑up Question'
-              : session.status === 'clusters'
-              ? '🧩 Choose a Group'
-              : 'Searching…'}
+            {session.status === "found"
+              ? "🎯 File Found!"
+              : session.status === "exhausted"
+                ? "📋 Narrowed Down"
+                : session.status === "followup"
+                  ? "💭 Follow‑up Question"
+                  : session.status === "clusters"
+                    ? "🧩 Choose a Group"
+                    : "Searching…"}
           </h2>
           <p className="query-subtitle">
-            {session.status === 'found'
+            {session.status === "found"
               ? session.found_file
-              : session.status === 'exhausted'
-              ? `Could not narrow further — ${session.remaining_files?.length} candidate(s)`
-              : session.status === 'followup'
-              ? `Question ${session.followup_count + 1} of ${session.max_followups}`
-              : session.status === 'clusters'
-              ? `Round ${session.round} — pick the group that matches your memory`
-              : `"${session.query}"`}
+              : session.status === "exhausted"
+                ? `Could not narrow further — ${session.remaining_files?.length} candidate(s)`
+                : session.status === "followup"
+                  ? `Question ${session.followup_count + 1} of ${session.max_followups}`
+                  : session.status === "clusters"
+                    ? `Round ${session.round} — pick the group that matches your memory`
+                    : `"${session.query}"`}
           </p>
         </div>
 
         <div className="query-results-body">
           {/* Cluster selection */}
-          {session.status === 'clusters' && session.clusters && (
+          {session.status === "clusters" && session.clusters && (
             <div className="cluster-list">
-              {session.clusters.map(cluster => (
+              {session.clusters.map((cluster) => (
                 <button
                   key={cluster.id}
                   className="cluster-option"
@@ -79,7 +79,7 @@ const QueryInterface = ({
           )}
 
           {/* Follow-up question */}
-          {session.status === 'followup' && session.pending_question && (
+          {session.status === "followup" && session.pending_question && (
             <div className="followup-section">
               <p className="followup-question">{session.pending_question}</p>
               <div className="followup-input-row">
@@ -88,11 +88,11 @@ const QueryInterface = ({
                   className="followup-input"
                   placeholder="Your answer…"
                   value={followupAnswer}
-                  onChange={e => setFollowupAnswer(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && followupAnswer.trim()) {
+                  onChange={(e) => setFollowupAnswer(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && followupAnswer.trim()) {
                       onAnswerFollowup(followupAnswer.trim());
-                      setFollowupAnswer('');
+                      setFollowupAnswer("");
                     }
                   }}
                   disabled={searchLoading}
@@ -102,7 +102,7 @@ const QueryInterface = ({
                   onClick={() => {
                     if (followupAnswer.trim()) {
                       onAnswerFollowup(followupAnswer.trim());
-                      setFollowupAnswer('');
+                      setFollowupAnswer("");
                     }
                   }}
                   disabled={searchLoading || !followupAnswer.trim()}
@@ -133,12 +133,15 @@ const QueryInterface = ({
   }
 
   // ── Search input mode ────────────────────────────────────────────────
-  if (selectedOption === 'search') {
+  if (selectedOption === "search") {
     return (
       <div className="query-interface">
         <div className="query-header">
           <h2 className="query-title">
-            <Search size={18} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+            <Search
+              size={18}
+              style={{ marginRight: 6, verticalAlign: "middle" }}
+            />
             Search Your Memory
           </h2>
           <p className="query-subtitle">
@@ -153,9 +156,9 @@ const QueryInterface = ({
               className="search-input"
               placeholder="e.g. that report about flooding in Somalia…"
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && searchQuery.trim()) {
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && searchQuery.trim()) {
                   onSearch(searchQuery.trim());
                 }
               }}
@@ -167,15 +170,15 @@ const QueryInterface = ({
               onClick={() => searchQuery.trim() && onSearch(searchQuery.trim())}
               disabled={searchLoading || !searchQuery.trim()}
             >
-              {searchLoading
-                ? <Loader size={14} className="spinner" />
-                : <Search size={14} />}
+              {searchLoading ? (
+                <Loader size={14} className="spinner" />
+              ) : (
+                <Search size={14} />
+              )}
             </button>
           </div>
 
-          {searchError && (
-            <p className="search-error">⚠ {searchError}</p>
-          )}
+          {searchError && <p className="search-error">⚠ {searchError}</p>}
         </div>
 
         <div className="query-footer">
@@ -194,16 +197,14 @@ const QueryInterface = ({
   return (
     <div className="query-interface">
       <div className="query-header">
-        <h2 className="query-title">
-          What would you like to explore?
-        </h2>
+        <h2 className="query-title">What would you like to explore?</h2>
         <p className="query-subtitle">
           Choose an option to navigate your memories
         </p>
       </div>
 
       <div className="query-options">
-        {queryOptions.map(option => (
+        {queryOptions.map((option) => (
           <QueryOption
             key={option.id}
             option={option}
@@ -213,12 +214,9 @@ const QueryInterface = ({
         ))}
       </div>
 
-      {selectedOption && selectedOption !== 'search' && (
+      {selectedOption && selectedOption !== "search" && (
         <div className="query-footer">
-          <button
-            onClick={onContinue}
-            className="continue-button"
-          >
+          <button onClick={onContinue} className="continue-button">
             <Play size={14} />
             Continue
           </button>

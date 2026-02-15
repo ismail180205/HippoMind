@@ -1,5 +1,6 @@
 .brain-visualization {
-  flex: 0 0 58%;
+  flex: 1;
+  min-width: 0;
   background: #1a1a2e;
   border-bottom: 1px solid rgba(153, 102, 204, 0.3);
   padding: 24px;
@@ -26,7 +27,7 @@
 .brain-subtitle {
   margin: 0;
   font-size: 12px;
-  color: #9966CC;
+  color: #9966cc;
 }
 
 .brain-controls {
@@ -38,7 +39,7 @@
 .selected-node-badge {
   padding: 6px 12px;
   background: rgba(153, 102, 204, 0.2);
-  border: 1px solid #9966CC;
+  border: 1px solid #9966cc;
   border-radius: 6px;
   font-size: 12px;
   color: #e0e0e0;
@@ -52,13 +53,13 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #9966CC;
+  background: #9966cc;
 }
 
 .reset-button {
   padding: 8px;
   background: rgba(153, 102, 204, 0.2);
-  border: 1px solid #9966CC;
+  border: 1px solid #9966cc;
   border-radius: 6px;
   cursor: pointer;
   display: flex;

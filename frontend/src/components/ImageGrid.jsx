@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { imageThumbnailUrl } from '../services/api';
-import './ImageGrid.css';
+import React, { useState } from "react";
+import { imageThumbnailUrl } from "../services/api";
+import "./ImageGrid.css";
 
 const ImageGrid = ({ images }) => {
   return (
     <div className="image-grid">
-      {images.map(img => (
+      {images.map((img) => (
         <ImageItem key={img.id} img={img} />
       ))}
     </div>
@@ -14,16 +14,14 @@ const ImageGrid = ({ images }) => {
 
 const ImageItem = ({ img }) => {
   const [failed, setFailed] = useState(false);
-  const src = img.thumbnail?.startsWith('http')
+  const src = img.thumbnail?.startsWith("http")
     ? img.thumbnail
     : imageThumbnailUrl(img.name);
 
   return (
     <div className="image-item" title={img.name}>
       {failed ? (
-        <div className="image-placeholder">
-          IMG
-        </div>
+        <div className="image-placeholder">IMG</div>
       ) : (
         <img
           className="image-thumb"

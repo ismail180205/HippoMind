@@ -22,7 +22,7 @@
 .data-panel-subtitle {
   margin: 0;
   font-size: 12px;
-  color: #9966CC;
+  color: #9966cc;
 }
 
 .data-panel-content {
@@ -51,7 +51,7 @@
 .empty-state {
   padding: 40px 20px;
   text-align: center;
-  color: #9966CC;
+  color: #9966cc;
   font-size: 13px;
   display: flex;
   align-items: center;
@@ -71,7 +71,7 @@
 }
 
 .result-label {
-  color: #9966CC;
+  color: #9966cc;
   font-size: 13px;
   margin: 0 0 8px;
 }
@@ -100,7 +100,7 @@
 }
 
 .conv-question {
-  color: #9966CC;
+  color: #9966cc;
   margin: 0 0 4px;
 }
 
@@ -112,8 +112,12 @@
 /* ── Spinner ──────────────────────────────────────────────────────────── */
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .spinner {

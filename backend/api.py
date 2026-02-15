@@ -115,6 +115,14 @@ class Session:
         self.round: int = 0
         self.status: str = "created"  # created | clusters | followup | found | exhausted
 
+        # ── navigation tree (for the graph) ──────────────────────────────
+        # Each entry: {nodeId, label, depth, parentNodeId, round, isOnPath}
+        self.nav_tree: list[dict] = []
+        self.current_nav_node: str | None = None   # nodeId of active position
+        # snapshots[round] = (points_copy, conversation_copy, followup_count)
+        self.snapshots: dict[int, tuple] = {}
+        self._nav_node_counter: int = 0
+
     # ── helpers ───────────────────────────────────────────────────────────
 
     def unique_files(self) -> list[str]:
@@ -131,6 +139,13 @@ class Session:
     def do_cluster(self) -> None:
         """Run HDBSCAN on current points, label via LLM, update state."""
         self.round += 1
+        # snapshot *before* narrowing so we can backtrack
+        self.snapshots[self.round] = (
+            [dict(pt) for pt in self.points],
+            list(self.conversation),
+            self.followup_count,
+        )
+
         vectors = np.array([pt["vector"] for pt in self.points])
         self.labels = cluster_vectors(vectors)
 
@@ -147,10 +162,34 @@ class Session:
         self.cluster_labels = label_clusters(cluster_texts)
         self.status = "clusters"
 
+        # ── update nav tree ───────────────────────────────────────────
+        parent_id = self.current_nav_node
+        for cid in sorted(self.cluster_labels):
+            self._nav_node_counter += 1
+            node_id = f"c{cid}-r{self.round}"
+            self.nav_tree.append({
+                "nodeId":       node_id,
+                "label":        self.cluster_labels[cid],
+                "depth":        self.round,
+                "parentNodeId": parent_id,
+                "round":        self.round,
+                "clusterId":    int(cid),
+                "isOnPath":     False,
+            })
+
     def pick_cluster(self, cluster_id: int) -> None:
         """Narrow to the chosen cluster."""
         if self.labels is None:
             raise ValueError("No clusters to pick from")
+
+        # Mark chosen node in nav tree as on-path
+        chosen_node_id = f"c{cluster_id}-r{self.round}"
+        for entry in self.nav_tree:
+            if entry["nodeId"] == chosen_node_id:
+                entry["isOnPath"] = True
+                self.current_nav_node = chosen_node_id
+                break
+
         self.points = [
             pt for pt, lbl in zip(self.points, self.labels)
             if lbl == cluster_id
@@ -185,6 +224,69 @@ class Session:
             self._check_termination_or_recluster()
         else:
             self._generate_followup()
+
+    def backtrack(self, target_node_id: str) -> None:
+        """Backtrack to a previous node in the nav tree, restoring state."""
+        # Find the target node
+        target = None
+        for entry in self.nav_tree:
+            if entry["nodeId"] == target_node_id:
+                target = entry
+                break
+        if not target:
+            raise ValueError(f"Node {target_node_id} not found in nav tree")
+
+        target_round = target["round"]
+        target_cluster_id = target.get("clusterId")
+
+        # Restore snapshot from that round
+        if target_round not in self.snapshots:
+            raise ValueError(f"No snapshot for round {target_round}")
+
+        saved_points, saved_conv, saved_fcount = self.snapshots[target_round]
+        self.points = [dict(pt) for pt in saved_points]
+        self.conversation = list(saved_conv)
+        self.followup_count = saved_fcount
+        self.found_file = None
+        self.pending_question = None
+
+        # Prune nav tree: remove all nodes deeper than target_round
+        # and also remove sibling branches that were from the same round
+        # but keep the target node's siblings (they're alternatives)
+        self.nav_tree = [
+            entry for entry in self.nav_tree
+            if entry["round"] <= target_round
+        ]
+
+        # Mark the target as on-path, unmark its siblings
+        for entry in self.nav_tree:
+            if entry["round"] == target_round and entry["parentNodeId"] == target["parentNodeId"]:
+                entry["isOnPath"] = (entry["nodeId"] == target_node_id)
+
+        self.current_nav_node = target_node_id
+
+        # Remove snapshots for rounds after this
+        for r in list(self.snapshots.keys()):
+            if r > target_round:
+                del self.snapshots[r]
+
+        # Now narrow to the chosen cluster and re-cluster
+        if target_cluster_id is not None:
+            # Re-run clustering to get labels for this snapshot
+            self.round = target_round - 1  # will be incremented in do_cluster
+            vectors = np.array([pt["vector"] for pt in self.points])
+            self.labels = cluster_vectors(vectors)
+
+            # Narrow to the chosen cluster
+            self.points = [
+                pt for pt, lbl in zip(self.points, self.labels)
+                if lbl == target_cluster_id
+            ]
+            self._check_termination_or_recluster()
+        else:
+            # Root node: re-cluster from scratch
+            self.round = 0
+            self.do_cluster()
 
     # ── internal ──────────────────────────────────────────────────────────
 
@@ -242,6 +344,8 @@ class Session:
             base["remaining_files"] = self.unique_files()
 
         base["conversation"] = self.conversation
+        base["nav_tree"] = self.nav_tree
+        base["current_nav_node"] = self.current_nav_node
         return base
 
 
@@ -255,6 +359,9 @@ class PickRequest(BaseModel):
 
 class AnswerRequest(BaseModel):
     answer: str = Field(..., min_length=1, description="User's answer to the follow‑up question")
+
+class BacktrackRequest(BaseModel):
+    node_id: str = Field(..., description="The nav-tree nodeId to backtrack to")
 
 
 # ── App lifecycle ─────────────────────────────────────────────────────────────
@@ -618,6 +725,17 @@ async def file_download(path: str = Query(..., description="File name relative t
     )
 
 
+@app.get("/files/preview")
+async def file_preview(path: str = Query(..., description="File name relative to DATA_DIR")):
+    """Serve a file inline (no download) — used for PDF preview in the browser."""
+    safe_name = os.path.basename(path)
+    full_path = os.path.join(config.DATA_DIR, safe_name)
+    if not os.path.isfile(full_path):
+        raise HTTPException(404, f"File not found: {safe_name}")
+    media_type = mimetypes.guess_type(full_path)[0] or "application/octet-stream"
+    return FileResponse(full_path, media_type=media_type)
+
+
 @app.get("/files/recent")
 async def recent_files(limit: int = Query(20, ge=1, le=100)):
     """
@@ -714,6 +832,19 @@ async def start_search(req: SearchRequest):
         hits=hits,
     )
 
+    # Initialise nav tree with root node (the user query)
+    root_node_id = "root"
+    session.nav_tree.append({
+        "nodeId":       root_node_id,
+        "label":        req.query,
+        "depth":        0,
+        "parentNodeId": None,
+        "round":        0,
+        "clusterId":    None,
+        "isOnPath":     True,
+    })
+    session.current_nav_node = root_node_id
+
     # Direct match?
     if hits[0]["score"] >= config.DIRECT_MATCH_THRESHOLD:
         session.found_file = hits[0]["file"]
@@ -785,6 +916,19 @@ async def answer_followup(session_id: str, req: AnswerRequest):
         raise HTTPException(400, f"No pending question (status='{session.status}')")
 
     session.answer_followup(req.answer)
+    return session.to_dict()
+
+
+@app.post("/session/{session_id}/backtrack")
+async def backtrack_session(session_id: str, req: BacktrackRequest):
+    """Backtrack to a previous node in the search navigation tree."""
+    session = sessions.get(session_id)
+    if not session:
+        raise HTTPException(404, "Session not found")
+    try:
+        session.backtrack(req.node_id)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
     return session.to_dict()
 
 

@@ -1,8 +1,14 @@
-import React from 'react';
-import { Image as ImageIcon, FileText, Search, Clock, Loader } from 'lucide-react';
-import ImageGrid from './ImageGrid';
-import FileList from './FileList';
-import './DataPanel.css';
+import React from "react";
+import {
+  Image as ImageIcon,
+  FileText,
+  Search,
+  Clock,
+  Loader,
+} from "lucide-react";
+import ImageGrid from "./ImageGrid";
+import FileList from "./FileList";
+import "./DataPanel.css";
 
 const DataPanel = ({
   selectedCategory,
@@ -17,20 +23,23 @@ const DataPanel = ({
       <div className="data-panel">
         <div className="data-panel-header">
           <h2 className="data-panel-title">
-            <Search size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+            <Search
+              size={16}
+              style={{ marginRight: 6, verticalAlign: "middle" }}
+            />
             Search Results
           </h2>
           <p className="data-panel-subtitle">
-            {session.status === 'found'
+            {session.status === "found"
               ? `Found: ${session.found_file}`
-              : session.status === 'exhausted'
-              ? `${session.remaining_files?.length || 0} candidate(s) remaining`
-              : `${session.total_chunks} chunks across ${session.files?.length || 0} file(s)`}
+              : session.status === "exhausted"
+                ? `${session.remaining_files?.length || 0} candidate(s) remaining`
+                : `${session.total_chunks} chunks across ${session.files?.length || 0} file(s)`}
           </p>
         </div>
 
         <div className="data-panel-content">
-          {session.status === 'found' && (
+          {session.status === "found" && (
             <div className="result-found">
               <div className="result-icon">🎯</div>
               <p className="result-label">Your file is:</p>
@@ -38,7 +47,7 @@ const DataPanel = ({
             </div>
           )}
 
-          {session.status === 'exhausted' && session.remaining_files && (
+          {session.status === "exhausted" && session.remaining_files && (
             <div className="data-section">
               <div className="section-header">
                 <FileText size={16} color="#9966CC" />
@@ -48,34 +57,36 @@ const DataPanel = ({
                 files={session.remaining_files.map((f, i) => ({
                   id: `rem-${i}`,
                   name: f,
-                  type: f.split('.').pop(),
-                  size: '—',
+                  type: f.split(".").pop(),
+                  size: "—",
                 }))}
               />
             </div>
           )}
 
           {/* Show ranked files in any status */}
-          {session.files && session.files.length > 0 && session.status !== 'found' && (
-            <div className="data-section">
-              <div className="section-header">
-                <FileText size={16} color="#9966CC" />
-                <span className="section-title">
-                  Candidate Files ({session.files.length})
-                </span>
+          {session.files &&
+            session.files.length > 0 &&
+            session.status !== "found" && (
+              <div className="data-section">
+                <div className="section-header">
+                  <FileText size={16} color="#9966CC" />
+                  <span className="section-title">
+                    Candidate Files ({session.files.length})
+                  </span>
+                </div>
+                <FileList
+                  files={session.files.map((f, i) => ({
+                    id: `cand-${i}`,
+                    name: f,
+                    type: f.split(".").pop(),
+                    size: session.file_scores?.[f]
+                      ? `score ${session.file_scores[f].toFixed(3)}`
+                      : "—",
+                  }))}
+                />
               </div>
-              <FileList
-                files={session.files.map((f, i) => ({
-                  id: `cand-${i}`,
-                  name: f,
-                  type: f.split('.').pop(),
-                  size: session.file_scores?.[f]
-                    ? `score ${session.file_scores[f].toFixed(3)}`
-                    : '—',
-                }))}
-              />
-            </div>
-          )}
+            )}
 
           {session.conversation && session.conversation.length > 0 && (
             <div className="data-section">
@@ -103,14 +114,17 @@ const DataPanel = ({
       <div className="data-panel">
         <div className="data-panel-header">
           <h2 className="data-panel-title">
-            <Clock size={16} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+            <Clock
+              size={16}
+              style={{ marginRight: 6, verticalAlign: "middle" }}
+            />
             Recent Files
           </h2>
           <p className="data-panel-subtitle">{recentFiles.length} file(s)</p>
         </div>
         <div className="data-panel-content">
           <FileList
-            files={recentFiles.map(f => ({
+            files={recentFiles.map((f) => ({
               id: f.id,
               name: f.name,
               type: f.type,
@@ -128,14 +142,14 @@ const DataPanel = ({
     <div className="data-panel">
       <div className="data-panel-header">
         <h2 className="data-panel-title">
-          {selectedCategory ? selectedCategory.name : 'Memory Data'}
+          {selectedCategory ? selectedCategory.name : "Memory Data"}
         </h2>
         <p className="data-panel-subtitle">
           {loadingData
-            ? 'Loading…'
+            ? "Loading…"
             : selectedData
-            ? `${selectedData.images.length} images, ${selectedData.files.length} files`
-            : 'Select a node to view data'}
+              ? `${selectedData.images.length} images, ${selectedData.files.length} files`
+              : "Select a node to view data"}
         </p>
       </div>
 
@@ -171,11 +185,12 @@ const DataPanel = ({
               </div>
             )}
 
-            {selectedData.images.length === 0 && selectedData.files.length === 0 && (
-              <div className="empty-state">
-                No files associated with this node
-              </div>
-            )}
+            {selectedData.images.length === 0 &&
+              selectedData.files.length === 0 && (
+                <div className="empty-state">
+                  No files associated with this node
+                </div>
+              )}
           </>
         ) : (
           <div className="empty-state">
