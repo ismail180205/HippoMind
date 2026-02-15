@@ -39,3 +39,23 @@
   font-size: 11px;
   color: #9966CC;
 }
+
+.file-date {
+  color: #666;
+}
+
+.file-download {
+  flex-shrink: 0;
+  padding: 4px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.file-item:hover .file-download {
+  opacity: 1;
+}
+
+.file-download:hover {
+  background: rgba(153, 102, 204, 0.2);
+}

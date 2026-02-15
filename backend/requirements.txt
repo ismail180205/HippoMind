@@ -1,0 +1,12 @@
+python-dotenv
+sentence-transformers
+fastembed
+pdfplumber
+langchain-text-splitters
+qdrant-client
+hdbscan
+ollama
+numpy
+pandas
+fastapi
+uvicorn[standard]
