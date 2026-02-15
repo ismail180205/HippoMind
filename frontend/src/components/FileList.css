@@ -95,8 +95,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .pdf-modal {
@@ -139,7 +143,7 @@
 }
 
 .pdf-modal-download {
-  color: #9966CC;
+  color: #9966cc;
   display: flex;
   align-items: center;
   padding: 4px;
@@ -160,7 +164,9 @@
   color: #888;
   cursor: pointer;
   border-radius: 4px;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
 }
 
 .pdf-modal-close:hover {
